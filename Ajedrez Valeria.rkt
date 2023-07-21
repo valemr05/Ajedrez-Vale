@@ -1,0 +1,3399 @@
+#lang racket
+( require graphics/graphics )
+( open-graphics )
+
+; se define la funcion Partida que contendrá el juego de ajedrez.
+( define ( Partida )
+;~~~~~~~~~~~~~~~~~~~~~~ Se crea la ventana del ajedrez.
+; la ventana que contiene el ajedrez
+( define Chess ( open-viewport "Ajedrez Valeria Muñoz Ramirez" 950 650 ) ) 
+;se agrega la imagen de fondo   
+( ( ( draw-pixmap-posn "Flor.png" ) Chess ) ( make-posn 0 0 ) )
+( ( draw-solid-rectangle Chess )( make-posn 46 46 ) 568 568  "rosybrown" )   
+( ( draw-solid-rectangle Chess ) ( make-posn 746 536 ) 108 48 "rosybrown" )
+( ( ( draw-pixmap-posn "salir.png" ) Chess ) ( make-posn 750 540 ) )
+   
+;~~~~~~~~~~~~~~~~~~~~~~Tablero Ajedrez
+; se define la funcion que crea nuestro tablero de ajedrez en cuadrados de 4x4
+( define ( Tablero contadorx contadory x y )
+   ; inicio condicional if ( < y 490 )
+      ( if ( < y 490 )
+           ; inicio condicional if ( and ( <= contadorx 4 )(<= contadory 4 ))
+           ( if ( and ( <= contadorx 4 )(<= contadory 4 ))
+                ; inici begin
+                ( begin
+                   ( ( draw-solid-rectangle Chess )( make-posn x y ) 70 70 "whitesmoke"  )
+                   ( ( draw-solid-rectangle Chess )( make-posn ( + x 70 ) y ) 70 70 "mistyrose" )
+                   ( ( draw-solid-rectangle Chess )( make-posn (+ x 70 ) ( + y 70 ) ) 70 70 "whitesmoke" )
+                   ( ( draw-solid-rectangle Chess )( make-posn x ( + y 70 ) ) 70 70 "mistyrose" )
+                   ( Tablero ( + contadorx 1 ) contadory ( + x 140 ) y )
+                ); finaliza begin
+                ; de lo contrario 
+                ( Tablero ( - contadorx 4 ) ( + contadory 1 ) ( - x 560 ) ( + y 140 ) )
+           ) ; finaliza condicional if ( and ( <= contadorx 4 )(<= contadory 4 ))
+      ; de lo contrario
+      ( void )
+      ); finaliza condicional if ( < y 490 )
+); finaliza definicion funcion Tablero 
+( Tablero 1 1 50 50 )
+   
+;~~~~~~~~~~~~~~~~~~~~~~~~Cadena de tablero y fichas 
+; se define orden con la cadena que nos ayuda a saber en que posicion estan las fichas.
+( define orden ( string-copy "WHFKkFHWPPPPPPPP................................ppppppppTCARrACT " ) )
+; se define tabAjedrez con el string que nos ayuda a saber en que color de casilla estamos.
+( define tabAjedrez "brbrbrbrrbrbrbrbbrbrbrbrrbrbrbrbbrbrbrbrrbrbrbrbbrbrbrbrrbrbrbrb" )
+
+;~~~~~~~~~~~~~~~~~~~~~~~~Posición en el string a coordenada X  
+   ; se define la funcion poststring-x que convierte la posicion en el string a la posicion en el eje X
+   ( define ( poststring-x posref )
+   ; inicio condicional 
+   ( cond ( ( or ( = posref 0 )
+                 ( = posref 8 ) 
+                 ( = posref 16 ) 
+                 ( = posref 24 ) 
+                 ( = posref 32 )
+                 ( = posref 40 )
+                 ( = posref 48 )
+                 ( = posref 56 )
+           ) 55 )            
+          ( ( or ( = posref 1 )
+                 ( = posref 9 )
+                 ( = posref 17 )
+                 ( = posref 25 )
+                 ( = posref 33 )
+                 ( = posref 41 )
+                 ( = posref 49 )
+                 ( = posref 57 )
+          ) 125 )
+          ( ( or ( = posref 2 )
+                 ( = posref 10 )
+                 ( = posref 18 )
+                 ( = posref 26 )
+                 ( = posref 34 )
+                 ( = posref 42 )
+                 ( = posref 50 )
+                 ( = posref 58 )
+          ) 195 )
+          ( ( or ( = posref 3 )
+                 ( = posref 11 )
+                 ( = posref 19 )
+                 ( = posref 27 )
+                 ( = posref 35 )
+                 ( = posref 43 )
+                 ( = posref 51 )
+                 ( = posref 59 )
+          ) 265 )
+          ( ( or ( = posref 4 )
+                 ( = posref 12 )
+                 ( = posref 20 )
+                 ( = posref 28 )
+                 ( = posref 36 )
+                 ( = posref 44 )
+                 ( = posref 52 )
+                 ( = posref 60 )
+          ) 335 )
+          ( ( or ( = posref 5 )
+                 ( = posref 13 )
+                 ( = posref 21 )
+                 ( = posref 29 )
+                 ( = posref 37 )
+                 ( = posref 45 )
+                 ( = posref 53 )
+                 ( = posref 61 )
+          ) 405 )
+          ( ( or ( = posref 6 )
+                 ( = posref 14 )
+                 ( = posref 22 )
+                 ( = posref 30 )
+                 ( = posref 38 )
+                 ( = posref 46 )
+                 ( = posref 54 )
+                 ( = posref 62 )
+          ) 475 )
+          ( ( or ( = posref 7 )
+                 ( = posref 15 )
+                 ( = posref 23 )
+                 ( = posref 31 )
+                 ( = posref 39 )
+                 ( = posref 47 )
+                 ( = posref 55 )
+                 ( = posref 63 )
+          ) 545 )
+    ); finaliza condicional 
+);fin definicion funcion poststring-x
+
+;~~~~~~~~~~~~~~~~~~~~~~~Posición en el string a coordenada Y
+; Se define la funcion poststring-y que convierte la posicion en el string a la posicion en el eje X
+( define ( poststring-y posref )
+   ; inicio condicional 
+   ( cond ( ( or ( = posref 0 )
+                 ( = posref 1 ) 
+                 ( = posref 2 ) 
+                 ( = posref 3 ) 
+                 ( = posref 4 )
+                 ( = posref 5 )
+                 ( = posref 6 )
+                 ( = posref 7 )
+           ) 55 )
+          ( ( or ( = posref 8 )
+                 ( = posref 9 )
+                 ( = posref 10 )
+                 ( = posref 11 )
+                 ( = posref 12 )
+                 ( = posref 13 )
+                 ( = posref 14 )
+                 ( = posref 15 )
+          ) 125 )
+          ( ( or ( = posref 16 )
+                 ( = posref 17 )
+                 ( = posref 18 )
+                 ( = posref 19 )
+                 ( = posref 20 )
+                 ( = posref 21 )
+                 ( = posref 22 )
+                 ( = posref 23 )
+          ) 195 )
+          ( ( or ( = posref 24 )
+                 ( = posref 25 )
+                 ( = posref 26 )
+                 ( = posref 27 )
+                 ( = posref 28 )
+                 ( = posref 29 )
+                 ( = posref 30 )
+                 ( = posref 31 )
+          ) 265 )
+          ( ( or ( = posref 32 )
+                 ( = posref 33 )
+                 ( = posref 34 )
+                 ( = posref 35 )
+                 ( = posref 36 )
+                 ( = posref 37 )
+                 ( = posref 38 )
+                 ( = posref 39 )
+          ) 335 )
+          ( ( or ( = posref 40 )
+                 ( = posref 41 )
+                 ( = posref 42 )
+                 ( = posref 43 )
+                 ( = posref 44 )
+                 ( = posref 45 )
+                 ( = posref 46 )
+                 ( = posref 47 )
+          ) 405 )
+          ( ( or ( = posref 48 )
+                 ( = posref 49 )
+                 ( = posref 50 )
+                 ( = posref 51 )
+                 ( = posref 52 )
+                 ( = posref 53 )
+                 ( = posref 54 )
+                 ( = posref 55 )
+          ) 475 )
+                ( ( or
+                 ( = posref 56 )
+                 ( = posref 57 )
+                 ( = posref 58 )
+                 ( = posref 59 )
+                 ( = posref 60 )
+                 ( = posref 61 )
+                 ( = posref 62 )
+                 ( = posref 63 )
+          ) 545 )
+); finaliza condicional 
+);fin definicion funcion poststring-y
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Coordenadas a posición en el string   
+; se define la funcion posxy-String que convierte las coordenadas en el eje x y el eje y a la posisicion en el string
+( define ( posxy-String posx posy  )
+    ; inicio condicional   
+( cond ( ( and ( >= posy 50 ) ( < posy 120 ) )
+          ; inicio condicional 
+          ( cond ( ( and ( >= posx 50 )  ( < posx 120 ) ) 0 )
+                 ( ( and ( >= posx 120 ) ( < posx 190 ) ) 1 )       
+                 ( ( and ( >= posx 190 ) ( < posx 260 ) ) 2 )
+                 ( ( and ( >= posx 260 ) ( < posx 330 ) ) 3 )
+                 ( ( and ( >= posx 330 ) ( < posx 400 ) ) 4 )
+                 ( ( and ( >= posx 400 ) ( < posx 470 ) ) 5 )
+                 ( ( and ( >= posx 470 ) ( < posx 520 ) ) 6 )
+                 ( ( and ( >= posx 520 ) ( < posx 610 ) ) 7 )
+           ( else 64 ) )
+           )
+           ( ( and ( >= posy 120 ) ( < posy 190 ) )
+             ( cond ( ( and ( >= posx 50 )( < posx 120 ) ) 8 )
+                    ( ( and ( >= posx 120 )( <  posx 190 ) ) 9 )
+                    ( ( and ( >= posx 190 )( < posx 260 ) ) 10 ) 
+                    ( ( and ( >= posx 260 )( < posx 330 ) ) 11 )
+                    ( ( and ( >= posx 330 )( < posx 400 ) ) 12 )
+                    ( ( and ( >= posx 400 )( < posx 470 ) ) 13 )
+                    ( ( and ( >= posx 470 )( < posx 540 ) ) 14 )
+                    ( ( and ( >= posx 540 )( < posx 610 ) ) 15 )                        
+                    ( else 64 )
+            ) )
+                ( ( and ( >= posy 190 ) ( < posy 260 ) )
+                  ( cond ( ( and ( >= posx 50 )( < posx 120 ) ) 16 )
+                         ( ( and ( >= posx 120 )( <  posx 190 ) ) 17 )
+                         ( ( and ( >= posx 190 )( < posx 260 ) ) 18 ) 
+                         ( ( and ( >= posx 260 )( < posx 330 ) ) 19 )
+                         ( ( and ( >= posx 330 )( < posx 400 ) ) 20 )
+                         ( ( and ( >= posx 400 )( < posx 470 ) ) 21 )
+                         ( ( and ( >= posx 470 )( < posx 540 ) ) 22 )
+                         ( ( and ( >= posx 540 )( < posx 610 ) ) 23 )
+                         ( else 64 )
+                  ) )
+                    ( ( and ( >= posy 260 ) ( < posy 330 ) )
+                      ( cond ( ( and ( >= posx 50 )( < posx 120 ) ) 24 )
+                             ( ( and ( >= posx 120 )( <  posx 190 ) ) 25 )
+                             ( ( and ( >= posx 190 )( < posx 260 ) ) 26 ) 
+                             ( ( and ( >= posx 260 )( < posx 330 ) ) 27 )
+                             ( ( and ( >= posx 330 )( < posx 400 ) ) 28 )
+                             ( ( and ( >= posx 400 )( < posx 470 ) ) 29 )
+                             ( ( and ( >= posx 470 )( < posx 540 ) ) 30 )
+                             ( ( and ( >= posx 540 )( < posx 610 ) ) 31 )
+                             ( else 64 )
+                  ) )
+                    ( ( and ( >= posy 330 ) ( < posy 400 ))
+                      ( cond ( ( and ( >= posx 50 )  ( < posx 120 ) ) 32 )
+                             ( ( and ( >= posx 120 )( <  posx 190 ) ) 33 )
+                             ( ( and ( >= posx 190 ) ( < posx 260 ) ) 34 ) 
+                             ( ( and ( >= posx 260 )( < posx 330 ) ) 35 )
+                             ( ( and ( >= posx 330 )( < posx 400 ) ) 36 )
+                             ( ( and ( >= posx 400 )( < posx 470 ) ) 37 )
+                             ( ( and ( >= posx 470 )( < posx 540 ) ) 38 )
+                             ( ( and ( >= posx 540 )( < posx 610 ) ) 39 )
+                             ( else 64 )
+
+                  )
+               )
+
+             ( ( and ( >= posy 400 ) ( < posy 470 ))
+               ( cond
+                  ( ( and ( >= posx 50 )  ( < posx 120 ) ) 40 )
+                  ( ( and ( >= posx 120 )( <  posx 190 ) ) 41 )
+                  ( ( and ( >= posx 190 ) ( < posx 260 ) ) 42 ) 
+                  ( ( and ( >= posx 260 )( < posx 330 ) ) 43 )
+                  ( ( and ( >= posx 330 )( < posx 400 ) ) 44 )
+                  ( ( and ( >= posx 400 )( < posx 470 ) ) 45 )
+                  ( ( and ( >= posx 470 )( < posx 540 ) ) 46 )
+                  ( ( and ( >= posx 540 )( < posx 610 ) ) 47 )
+                  ( else 64 )
+
+                  )
+               )
+                    
+
+             ( ( and ( >= posy 470 ) ( < posy 540 ))
+               ( cond
+                  ( ( and ( >= posx 50 )  ( < posx 120 ) ) 48 )
+                  ( ( and ( >= posx 120 )( <  posx 190 ) ) 49 )
+                  ( ( and ( >= posx 190 ) ( < posx 260 ) ) 50 ) 
+                  ( ( and ( >= posx 260 )( < posx 330 ) ) 51 )
+                  ( ( and ( >= posx 330 )( < posx 400 ) ) 52 )
+                  ( ( and ( >= posx 400 )( < posx 470 ) ) 53 )
+                  ( ( and ( >= posx 470 )( < posx 540 ) ) 54 )
+                  ( ( and ( >= posx 540 )( < posx 610 ) ) 55 )
+                  ( else 64 )
+                  )
+               )
+
+             ( ( and ( >= posy 540 ) ( < posy 610 ))
+               ( cond
+                  ( ( and ( >= posx 50 )  ( < posx 120 ) ) 56 )
+                  ( ( and ( >= posx 120 )( <  posx 190 ) ) 57 )
+                  ( ( and ( >= posx 190 ) ( < posx 260 ) ) 58 ) 
+                  ( ( and ( >= posx 260 )( < posx 330 ) ) 59 )
+                  ( ( and ( >= posx 330 )( < posx 400 ) ) 60 )
+                  ( ( and ( >= posx 400 )( < posx 470 ) ) 61 )
+                  ( ( and ( >= posx 470 )( < posx 540 ) ) 62 )
+                  ( ( and ( >= posx 540 )( < posx 610 ) ) 63 )
+                  ( else 64 )
+                  )                      
+               )
+             ( else 64 )
+             )
+      );fin definicion funcion posxy-String
+   
+;----------------------------------------------Caracter en el string a nombre imagen----------------------------------------------    
+   ;definimos la funcon char-img para darle un caracter y nos devuelve la imagen que le corresponde
+   ( define ( char-img char )
+      ( cond ( ( equal? char #\W ) "rocan.png" )
+             ( ( equal? char #\H ) "caballeron.png" )
+             ( ( equal? char #\F ) "obispon.png" )
+             ( ( equal? char #\K ) "reyn.png" )
+             ( ( equal? char #\k ) "reinan.png" )
+             ( ( equal? char #\P ) "peonn.png" )
+             ( ( equal? char #\T ) "roca.png" )
+             ( ( equal? char #\C ) "caballero.png" )
+             ( ( equal? char #\A ) "obispo.png" )
+             ( ( equal? char #\R ) "rey.png" )
+             ( ( equal? char #\r ) "reina.png" )
+             ( ( equal? char #\p ) "peon.png" )
+      );fin cond
+   );fin definicion de la funcion char-img
+
+;----------------------------------------------Borrar la ficha de la casilla anterior 
+   ;definimos la funcion PonerCasTab para que al realizar un movimiento se elimine la ficha
+   ( define ( PonerCasTab aposx aposy posx posy char )
+      ( if ( equal? ( string-ref tabAjedrez ( posxy-String aposx aposy ) ) #\b )
+           { begin
+              ( ( draw-solid-rectangle Chess ) ( make-posn ( - aposx 5 ) ( - aposy 5 ) ) 70 70 "whitesmoke" )
+              ( string-set! orden ( posxy-String aposx aposy ) #\. )
+              ( string-set! orden ( posxy-String posx posy ) char )
+              ( if ( equal? ( string-ref tabAjedrez ( posxy-String posx posy ) ) #\b )
+                   ( ( draw-solid-rectangle Chess ) ( make-posn ( - posx 5 ) ( - posy 5 ) ) 70 70 "whitesmoke" )
+              ;de lo contrario
+                   ( ( draw-solid-rectangle Chess ) ( make-posn ( - posx 5 ) ( - posy 5 ) ) 70 70 "mistyrose" )
+              );fin if
+              ( ( ( draw-pixmap-posn ( char-img char ) ) Chess ) ( make-posn posx posy ) )
+           };fin begin
+      ;de lo contrario
+           { begin
+              ( ( draw-solid-rectangle Chess ) ( make-posn ( - aposx 5 ) ( - aposy 5 ) ) 70 70 "mistyrose" )
+              ( string-set! orden ( posxy-String aposx aposy ) #\. )
+              ( string-set! orden ( posxy-String posx posy ) char )
+              ( if ( equal? ( string-ref tabAjedrez ( posxy-String posx posy ) ) #\b )
+                   ( ( draw-solid-rectangle Chess ) ( make-posn ( - posx 5 ) ( - posy 5 ) ) 70 70 "whitesmoke" )
+              ;de lo contrario
+                   ( ( draw-solid-rectangle Chess ) ( make-posn ( - posx 5 ) ( - posy 5 ) ) 70 70 "mistyrose" )
+              );fin if
+              ( ( ( draw-pixmap-posn ( char-img char ) ) Chess ) ( make-posn posx posy ) )
+           };fin begin
+      );fin if
+   );fin definicion de la funcion PonerCasTab
+   
+;-----------------------------------------Ubicacion de las fichas en el tablero segun string  
+   ;definimos la funcion PonerFichas que segun el string orden imprime las fichas en la posicion que les corresponde
+   ( define ( PonerFichas posicion final )
+      ( if ( <= posicion final )
+                  ;Torre negra
+           ( cond ( ( equal? ( string-ref orden posicion ) #\W )
+                    ( ( ( draw-pixmap-posn ( char-img #\W ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Caballo negro
+                  ( ( equal? ( string-ref orden posicion ) #\H )
+                    ( ( ( draw-pixmap-posn ( char-img #\H ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Alfil negro
+                  ( ( equal? ( string-ref orden posicion ) #\F )
+                    ( ( ( draw-pixmap-posn ( char-img #\F ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )           
+                  ;Rey negro
+                  ( ( equal? ( string-ref orden posicion ) #\K )
+                    ( ( ( draw-pixmap-posn ( char-img #\K ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Reina negra
+                  ( ( equal? ( string-ref orden posicion ) #\k )
+                    ( ( ( draw-pixmap-posn ( char-img #\k ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )                  
+                  ;Peon negro
+                  ( ( equal? ( string-ref orden posicion ) #\P )
+                    ( ( ( draw-pixmap-posn ( char-img #\P ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )                  
+                  ;Torre rosa
+                  ( ( equal? ( string-ref orden posicion ) #\T )
+                    ( ( ( draw-pixmap-posn ( char-img #\T ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Caballo rosa
+                  ( ( equal? ( string-ref orden posicion ) #\C )
+                    ( ( ( draw-pixmap-posn ( char-img #\C ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Alfil rosa
+                  ( ( equal? ( string-ref orden posicion ) #\A )
+                    ( ( ( draw-pixmap-posn ( char-img #\A ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )           
+                  ;Rey rosa
+                  ( ( equal? ( string-ref orden posicion ) #\R )
+                    ( ( ( draw-pixmap-posn ( char-img #\R ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Reina rosa
+                  ( ( equal? ( string-ref orden posicion ) #\r )
+                    ( ( ( draw-pixmap-posn ( char-img #\r ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Peon rosa
+                  ( ( equal? ( string-ref orden posicion ) #\p )
+                    ( ( ( draw-pixmap-posn ( char-img #\p ) ) Chess ) ( make-posn ( poststring-x posicion ) ( poststring-y posicion ) ) )
+                    ( PonerFichas ( + posicion 1 ) final ) )
+                  ;Casilla vacia
+                  ( ( equal? ( string-ref orden posicion ) #\. )                    
+                    ( PonerFichas ( + posicion 1 ) final ) )
+           );fin cond
+      ;de lo contrario
+           ( void )
+      );fin if
+   );fin definicion funcion PonerFichas
+   ( PonerFichas 0 63 )
+
+;----------------------------------------------Verificar si es posible el movimiento
+   ;definimos VerificarDer-Abajo para verificar si la ficha se puede mover y tiene el camino vacio
+   ( define ( VerificarDer-Abajo posa pos acumulado total num )
+      ( if ( < posa pos )
+           ( if ( equal? ( string-ref orden posa ) #\. )
+                ( VerificarDer-Abajo ( + posa num ) pos ( + acumulado 1 ) total num )
+           ;de lo contrario
+                ( VerificarDer-Abajo ( + posa num ) pos acumulado total num )
+           );fin if
+      ;de lo contrario
+           ( if ( = acumulado total )
+                #t
+           ;de lo contrario
+                #f
+           );fin if
+      );fin if
+   );fin definicion funcion VerificarDer-Abajo
+
+   ;definimos VerificarDer-Abajo para verificar si la ficha se puede mover y tiene el camino vacio
+   ( define ( VerificarIzq-Arriba posa pos acumulado total num )
+      ( if ( > posa pos )
+           ( if ( equal? ( string-ref orden posa ) #\. )
+                ( VerificarIzq-Arriba ( - posa num ) pos ( + acumulado 1 ) total num )
+           ;de lo contrario
+                ( VerificarIzq-Arriba ( - posa num ) pos acumulado total num )
+           );fin if
+      ;de lo contrario
+           ( if ( = acumulado total )
+                #t
+           ;de lo contrario
+                #f
+           );fin if
+      );fin if
+   );fin definicion funcion VerificarIzq-Arriba
+
+   ;definimos VerificarDer-Abajo para verificar si la ficha se puede mover y tiene el camino vacio
+   ( define ( VerificarDiagonal posa pos )      
+      ;definimos VerificarDiag-Abajo para verificar si es posible hacer una diagonal hacia abajo
+      ( define ( VerificarDiag-Abajo posa pos acumulado total num )
+         ( if ( < posa pos )
+              ( if ( equal? ( string-ref orden posa ) #\. )
+                   ( VerificarDiag-Abajo ( + posa num ) pos ( + acumulado 1 ) total num )
+              ;de lo contrario
+                   ( VerificarDiag-Abajo ( + posa num ) pos acumulado total num )
+              );fin if
+         ;de lo contrario 
+              ( if ( = acumulado total )
+                   #t
+              ;de lo contrario
+                   #f
+              );fin if
+         );fin if
+      );fin definicion funcion VerificarDiag-Abajo
+
+      ;definimos VerificarDiag-Arriba para verificar si es posible hacer una diagonal hacia arriba
+      ( define ( VerificarDiag-Arriba posa pos acumulado total num )
+         ( if ( > posa pos )
+              ( if ( equal? ( string-ref orden posa ) #\. )
+                   ( VerificarDiag-Arriba ( - posa num ) pos ( + acumulado 1 ) total num )
+              ;de lo contrario
+                   ( VerificarDiag-Arriba ( - posa num ) pos acumulado total num )
+              );fin if
+         ;de lo contrario
+              ( if ( = acumulado total )
+                   #t
+              ;de lo contrario
+                   #f
+              );fin if
+         );fin if
+      );fin definicion funcion VerificarDiag-Arriba
+
+      ;en el siguinete condicional se evalua cual es la diagonal que se va a hacer
+      ( cond ;diagonal derecha abajo
+             ( ( = ( + posa 9 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 0 9 ) )
+             ( ( = ( + posa 18 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 1 9 ) )
+             ( ( = ( + posa 27 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 2 9 ) )
+             ( ( = ( + posa 36 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 3 9 ) )
+             ( ( = ( + posa 45 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 4 9 ) )
+             ( ( = ( + posa 54 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 5 9 ) )
+             ( ( = ( + posa 63 ) pos ) ( VerificarDiag-Abajo ( + posa 9 ) pos 0 6 9 ) )         
+             ;diagonal izquierda abajo
+             ( ( = ( + posa 7 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 0 7 ) )
+             ( ( = ( + posa 14 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 1 7 ) )
+             ( ( = ( + posa 21 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 2 7 ) )
+             ( ( = ( + posa 28 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 3 7 ) )
+             ( ( = ( + posa 35 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 4 7 ) )
+             ( ( = ( + posa 42 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 5 7 ) )
+             ( ( = ( + posa 49 ) pos ) ( VerificarDiag-Abajo ( + posa 7 ) pos 0 6 7 ) )
+             ;diagonal derecha arriba
+             ( ( = ( - posa 7 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 0 7 ) )
+             ( ( = ( - posa 14 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 1 7 ) )
+             ( ( = ( - posa 21 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 2 7 ) )
+             ( ( = ( - posa 28 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 3 7 ) )
+             ( ( = ( - posa 35 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 4 7 ) )
+             ( ( = ( - posa 42 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 5 7 ) )
+             ( ( = ( - posa 49 ) pos ) ( VerificarDiag-Arriba ( - posa 7 ) pos 0 6 7 ) )
+             ;diagonal izquierda arriba
+             ( ( = ( - posa 9 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 0 9 ) )
+             ( ( = ( - posa 18 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 1 9 ) )
+             ( ( = ( - posa 27 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 2 9 ) )
+             ( ( = ( - posa 36 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 3 9 ) )
+             ( ( = ( - posa 45 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 4 9 ) )
+             ( ( = ( - posa 54 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 5 9 ) )
+             ( ( = ( - posa 63 ) pos ) ( VerificarDiag-Arriba ( - posa 9 ) pos 0 6 9 ) )
+      );fin cond
+   );fin definicion de la funcion VerificarDiagonal
+
+;----------------------------------------------Jaque----------------------------------------------
+   ( define ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE mov )
+      ( define JaqstAjedrez ( string-copy orden ) )
+      ( printf "\n~a" mov )
+      ( define ( SimularMov )
+         ( string-set! JaqstAjedrez apos #\. )
+         ( string-set! JaqstAjedrez pos mov )
+      )
+      ( SimularMov )
+      ( define ( HallarRey pos )
+         ( if ( <= pos 64 )
+              ( if ( equal? ( string-ref JaqstAjedrez pos ) rey )
+                   {begin
+                     (displayln pos )
+                     pos }
+              ;de lo contrario
+                   ( HallarRey ( + pos 1 ) )
+              );fin if
+          ;de lo contrario
+              ( void )
+         );fin if
+      );fin definicion HallarRey
+      
+      ( define ( BuscarDiagDerArriba posRey )
+         ( if ( and ( >= posRey 8 ) ( <= posRey 63 ) )
+              ( if ( = ( remainder posRey 8 ) 7 )
+                   #t
+              ( if ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) #\. )
+                   ( BuscarDiagDerArriba ( - posRey 7 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) alfE )
+                             ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarDiagDerArriba" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarDiagDerArriba" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarDiagDerArriba ( - posRey 7 ) )
+                        );fin if
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarDiagDerArriba" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarDiagDerArriba
+
+      ( define ( BuscarArriba posRey )
+         ( if ( and ( >= posRey 8 ) ( <= posRey 63 ) )
+              ( if ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) #\. )
+                   ( BuscarArriba ( - posRey 8 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) torrE )
+                             ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarArriba" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 8 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarArriba" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarArriba ( - posRey 8 ) )
+                        );fin if
+                   );rin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarArriba" )
+                 #t
+              }
+         );fin if
+      );fin definicion de la funcion BuscarArriba
+
+      ( define ( BuscarDiagIzqArriba posRey )
+         ( if ( and ( >= posRey 8 ) ( <= posRey 63 ) )
+              ( if ( = ( remainder posRey 8 ) 0 )
+                   #t
+              ( if ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) #\. )
+                   ( BuscarDiagIzqArriba ( - posRey 9 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) alfE )
+                             ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarDiagIzqArriba" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarDiagIzqArriba" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarDiagIzqArriba ( - posRey 9 ) )
+                        );fin if
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarDiagIzqArriba" )
+                 #t
+              }
+         );fin if
+      );fin definicion de la funcion BuscarDiagIzqArriba
+
+      ( define ( BuscarIzq posRey )
+         ( if ( and ( >= posRey 0 ) ( <= posRey 63 ) )
+              ( if ( = ( remainder posRey 8 ) 0 )
+                   #t
+              ( if ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) #\. )
+                   ( BuscarIzq ( - posRey 1 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) torrE )
+                             ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarIzq" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey 1 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarIzq" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarIzq ( - posRey 1 ) )
+                        );fin if
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarIzq" )
+                 #t
+              }
+         );fin if
+      );fin definicion de la funcion BuscarIzq
+
+      ( define ( BuscarDiagIzqAbajo posRey )
+         ( if ( and ( >= posRey 0 ) ( <= posRey 55 ) )
+              ( if ( = ( remainder posRey 8 ) 0 )
+                   #t
+              ( if ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) #\. )
+                   ( BuscarDiagIzqAbajo ( + posRey 7 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) alfE )
+                             ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarDiagIzqAbajo" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarDiagIzqAbajo" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarDiagIzqAbajo ( + posRey 7 ) )
+                        );fin if
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarDiagIzqAbajo" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarDiagIzqAbajo
+
+      ( define ( BuscarAbajo posRey )
+         ( if ( and ( >= posRey 0 ) ( <= posRey 55 ) )
+              ( if ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) #\. )
+                   ( BuscarAbajo ( + posRey 8 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) torrE )
+                             ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarAbajo" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 8 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarAbajo" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarAbajo ( + posRey 8 ) )
+                        );fin if
+                   );rin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarAbajo" )
+                 #t
+              }
+         );fin if
+      );fin definicion de la funcion BuscarAbajo
+
+      ( define ( BuscarDiagDerAbajo posRey )
+         ( if ( and ( >= posRey 0 ) ( <= posRey 55 ) )
+              ( if ( = ( remainder posRey 8 ) 7 )
+                   #t
+              ( if ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) #\. )
+                   ( BuscarDiagDerAbajo ( + posRey 9 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) alfE )
+                             ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarDiagDerAbajo" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarDiagDerAbajo" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarDiagDerAbajo ( + posRey 7 ) )
+                        );fin if
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarDiagDerAbajo" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarDiagDerAbajo
+
+      ( define ( BuscarDer posRey )
+         ( if ( and ( >= posRey 0 ) ( <= posRey 63 ) )
+              ( if ( = ( remainder posRey 8 ) 7 )
+                   #t
+              ( if ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) #\. )
+                   ( BuscarDer ( + posRey 1 ) )
+              ;de lo contrario
+                   ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) torrE )
+                             ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) reiE ) )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarDer" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey 1 ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarDer" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( BuscarDer ( + posRey 1 ) )
+                        );fin if
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarDer" )
+                 #t
+              }
+         );fin if
+      );fin definicion de la funcion BuscarDer
+
+      ( define ( BuscarCabArriba posRey num min max mod1 mod2 )
+         ( if ( and ( >= posRey min ) ( <= posRey max ) )
+              ( if ( and ( >= ( remainder posRey 8 ) mod1 ) ( <= ( remainder posRey 8 ) mod2 ) )     
+              ( if ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) #\. )
+                   { begin
+                      ( printf "\n#t espacio BuscarCabArriba" )
+                      #t
+                   }
+              ;de lo contrario
+                   ( if ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) cabE )
+                        { begin
+                           ( printf "\n#f cabE BuscarCabArriba" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( - posRey num ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarCabArriba" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( printf "\nnada" )
+                        );fin if
+                   );rin if
+              );fin if
+              #t
+              );fin if
+          ;de lo contrario
+              #t
+         );fin if
+      );fin definicion de la funcion BuscarCabArriba
+
+   ( define ( BuscarCabAbajo posRey num min max mod1 mod2 )
+         ( if ( and ( >= posRey min ) ( <= posRey max ) )
+              ( if ( and ( >= ( remainder posRey 8 ) mod1 ) ( <= ( remainder posRey 8 ) mod2 ) )                 
+              ( if ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) #\. )
+                   { begin
+                      ( printf "\n#t espacio BuscarCabArriba" )
+                      #t
+                   }
+              ;de lo contrario
+                   ( if ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) cabE )
+                        { begin
+                           ( printf "\n#f cabE BuscarCabArriba" )
+                           #f
+                        }
+                   ;de lo contrario
+                        ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) torrA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) cabA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) alfA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) reiA )
+                                  ( equal? ( string-ref JaqstAjedrez ( + posRey num ) ) pA ) )
+                             { begin
+                                ( printf "\n#t amix BuscarCabArriba" )
+                                #t
+                             }
+                        ;de lo contrario
+                             ( printf "\nnada" )
+                        );fin if
+                   );fin if
+              );fin if
+              #t
+              );fin if
+          ;de lo contrario
+              #t
+         );fin if
+      );fin definicion de la funcion BuscarCabArriba
+      ( define ( BuscarPeonesB posRey )
+      ( define ( BuscarPeonDer posRey )
+         ( if ( and ( >= posRey 8 ) ( <= posRey 62 ) )
+              ( if ( = ( remainder posRey 8 ) 0 )
+                   #t
+              ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) torrA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) cabA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) alfA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) reiA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) pA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) #\. ) )
+                   { begin
+                      ( printf "\n#t amix BuscarPeonIzq" )
+                      #t
+                   }
+              ;de lo contrario
+                   ( if ( equal? ( string-ref JaqstAjedrez ( - posRey 7 ) ) pE )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarPeonIzq" )
+                           #f
+                        }
+                   ;de lo contrario
+                        { begin
+                           ( printf "\n#t amix BuscarPeonIzq" )
+                           #t
+                         }
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarPeonIzq" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarPeonIzqAbajo
+
+      ( define ( BuscarPeonIzq posRey )
+         ( if ( and ( >= posRey 9 ) ( <= posRey 63 ) )
+              ( if ( = ( remainder posRey 8 ) 7 )
+                   #t
+              ( if ( or ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) torrA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) cabA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) alfA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) reiA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) pA )
+                        ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) #\. ) )
+                   { begin
+                      ( printf "\n#t amix BuscarPeonDer" )
+                      #t
+                   }
+              ;de lo contrario
+                   ( if ( equal? ( string-ref JaqstAjedrez ( - posRey 9 ) ) pE )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarPeonDer" )
+                           #f
+                        }
+                   ;de lo contrario
+                        { begin
+                           ( printf "\n#t amix BuscarPeonDer" )
+                           #t
+                        }
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarPeonDer" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarDiagDerAbajo
+         ( if ( and ( BuscarPeonIzq posRey )
+                    ( BuscarPeonDer posRey ) )
+              { begin
+                 ( printf "\n#t amix BuscarPeones" )
+                 #t
+              }
+         ;de lo contrario
+              { begin
+                 ( printf "\n#f BuscarPeones" )
+                 #f
+              }
+        );fin if
+     );fin definicion BuscarPeonesB
+
+      ( define ( BuscarPeonesN posRey )
+      ( define ( BuscarPeonDer posRey )
+         ( if ( and ( >= posRey 0 ) ( <= posRey 54 ) )
+              ( if ( = ( remainder posRey 8 ) 7 )
+                   #t
+              ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) torrA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) cabA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) alfA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) reiA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) pA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) #\. ) )
+                   { begin
+                      ( printf "\n#t amix BuscarPeonIzq" )
+                      #t
+                   }
+              ;de lo contrario
+                   ( if ( equal? ( string-ref JaqstAjedrez ( + posRey 9 ) ) pE )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarPeonIzq" )
+                           #f
+                        }
+                   ;de lo contrario
+                        { begin
+                           ( printf "\n#t amix BuscarPeonIzq" )
+                           #t
+                         }
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarPeonIzq" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarPeonIzqAbajo
+
+      ( define ( BuscarPeonIzq posRey )
+         ( if ( and ( >= posRey 1 ) ( <= posRey 55 ) )
+              ( if ( = ( remainder posRey 8 ) 0 )
+                   #t
+              ( if ( or ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) torrA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) cabA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) alfA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) reiA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) pA )
+                        ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) #\. ) )
+                   { begin
+                      ( printf "\n#t amix BuscarPeonDer" )
+                      #t
+                   }
+              ;de lo contrario
+                   ( if ( equal? ( string-ref JaqstAjedrez ( + posRey 7 ) ) pE )
+                        { begin
+                           ( printf "\n#f alfE reiE BuscarPeonDer" )
+                           #f
+                        }
+                   ;de lo contrario
+                        { begin
+                           ( printf "\n#t amix BuscarPeonDer" )
+                           #t
+                        }
+                   );rin if
+              );fin if
+              );fin if
+          ;de lo contrario
+              { begin
+                 ( printf "\n#t amix BuscarPeonDer" )
+                 #t
+              }
+         );fin if
+     );fin definicion de la funcion BuscarDiagDerAbajo
+         ( if ( and ( BuscarPeonIzq posRey )
+                    ( BuscarPeonDer posRey ) )
+              { begin
+                 ( printf "\n#t amix BuscarPeones" )
+                 #t
+              }
+         ;de lo contrario
+              { begin
+                 ( printf "\n#f BuscarPeones" )
+                 #f
+              }
+        );fin if
+     );fin definicion BuscarPeonesB
+
+      ( if ( and ( BuscarDiagDerArriba ( HallarRey 0 ) )
+                 ( BuscarArriba ( HallarRey 0 ) )
+                 ( BuscarDiagIzqArriba ( HallarRey 0 ) )
+                 ( BuscarIzq ( HallarRey 0 ) )
+                 ( BuscarDiagIzqAbajo ( HallarRey 0 ) )
+                 ( BuscarAbajo ( HallarRey 0 ) )
+                 ( BuscarDiagDerAbajo ( HallarRey 0 ) )
+                 ( BuscarDer ( HallarRey 0 ) )
+                 ( BuscarCabArriba ( HallarRey 0 ) 6 8 61 0 5 )
+                 ( BuscarCabArriba ( HallarRey 0 ) 15 16 62 0 6 )
+                 ( BuscarCabArriba ( HallarRey 0 ) 17 17 63 1 7 )
+                 ( BuscarCabArriba ( HallarRey 0 ) 10 10 63 2 7 )
+                 ( BuscarCabAbajo ( HallarRey 0 ) 6 2 55 2 7 )
+                 ( BuscarCabAbajo ( HallarRey 0 ) 15 1 47 1 7 )
+                 ( BuscarCabAbajo ( HallarRey 0 ) 17 0 46 0 6 )
+                 ( BuscarCabAbajo ( HallarRey 0 ) 10 0 53 0 5 )
+                 ( if ( equal? rey #\K )( BuscarPeonesN ( HallarRey 0 ) )
+                                        ( BuscarPeonesB ( HallarRey 0 ) ) ) )
+           { begin
+              ( printf "\nno jaque " )
+              #t
+              }
+      ;de lo contrario
+           { begin
+              ;se sgrega la imagen Rey en Jaque
+              ( ( ( draw-pixmap-posn "jaque.png" ) Chess ) ( make-posn 696 310 ) )
+              ( sleep 1 )
+              ( printf "\nrey en jaque " )              
+              #f              
+           };fin begin
+      );fin if
+   );fin definicion de la funcion Jaque
+   
+;----------------------------------------------Jaque----------------------------------------------
+   ( define ( JaqueMate rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE )
+      ( define JaqMstAjedrez ( string-copy orden ) )
+      
+      ( define ( TorreAliada posSt )
+         ( define ( MoverArriba apos pos )
+            ( if ( >= pos 8 )
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                           0
+                      ;de lo contrario
+                           ( MoverArriba apos ( - pos 8 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzq apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzq apos apos )
+                           );fin if                      
+                      );fin if
+                 );fin if
+            ;de lo contrario
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                      0
+                 ;de lo contrario
+                      ( MoverIzq apos apos )
+                 );fin if 
+            );fin if
+         );fin definicion MoverArriba
+
+         ( define ( MoverIzq apos pos )
+            ( if ( or ( = pos 0 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) ( = pos 56 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                      0
+                 ;de lo contrario
+                      ( MoverAbajo apos apos )
+                 );fin if
+             ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                           0
+                      ;de lo contrario
+                           ( MoverIzq apos ( - pos 1 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                                ;de lo contrario
+                                ( MoverAbajo apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                                ;de lo contrario
+                                ( MoverAbajo apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if                 
+            );fin if
+         );fin definicion MoverIzq
+
+         ( define ( MoverAbajo apos pos )
+            ( if ( <= pos 55 )
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                           0
+                      ;de lo contrario
+                           ( MoverAbajo apos ( + pos 8 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                           ;de lo contrario
+                                ( MoverDer apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                           ;de lo contrario
+                                ( MoverDer apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            ;de lo contrario
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                      0
+                 ;de lo contrario
+                      ( MoverDer apos apos )
+                 );fin if 
+            );fin if
+         );fin definicion MoverAbajo
+
+         ( define ( MoverDer apos pos )
+            ( if ( or ( = pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) ( = pos 63 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                      0
+                 ;de lo contrario
+                      1
+                 );fin if
+             ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                           0
+                      ;de lo contrario
+                           1
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      );fin if                      
+                 );fin if                 
+            );fin if
+         );fin definicion MoverDer
+         
+         ( MoverArriba posSt posSt )
+      );fin definicion funcion TorreAliada
+
+      ( define ( CaballoAliado posSt )         
+         ( define ( BuscarCabArriba pos num min max mod1 mod2 )
+            ( if ( and ( >= pos min ) ( <= pos max ) )
+                 ( if ( and ( >= ( remainder pos 8 ) mod1 ) ( <= ( remainder pos 8 ) mod2 ) )     
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos num ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos num ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos num ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos num ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos num ) ) pE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos num ) ) #\. ) )
+                           ( if ( Jaque pos ( - pos num ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE cabA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      ;de lo contrario
+                           1
+                      );fin if
+                 ;de lo contrario
+                      1
+                 );fin if
+            ;de lo contrario
+                 1
+            );fin if
+         );fin definicion de la funcion BuscarCabArriba
+
+         ( define ( BuscarCabAbajo pos num min max mod1 mod2 )
+            ( if ( and ( >= pos min ) ( <= pos max ) )
+                 ( if ( and ( >= ( remainder pos 8 ) mod1 ) ( <= ( remainder pos 8 ) mod2 ) )                 
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos num ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos num ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos num ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos num ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos num ) ) pE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos num ) ) #\. ) )
+                           ( if ( Jaque pos ( + pos num ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE cabA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      ;de lo contrario
+                           1
+                      );fin if
+                 ;de lo contrario
+                      1
+                 );fin if
+            ;de lo contrario
+                 1
+            );fin if
+         );fin definicion de la funcion BuscarCabArriba
+
+         ( if ( BuscarCabArriba posSt 6 8 61 0 5 )
+              0
+         ;de lo contrario
+              ( if ( BuscarCabArriba posSt 15 16 62 0 6 )
+                   0
+               ;de lo contrario
+                 ( if ( BuscarCabArriba posSt 17 17 63 1 7 )
+                      0
+                 ;de lo contrario
+                      ( if ( BuscarCabArriba posSt 10 10 63 2 7 )
+                           0
+                      ;de lo contrario
+                           ( if ( BuscarCabAbajo posSt 6 2 55 2 7 )
+                                0
+                           ;de lo contrario
+                                ( if ( BuscarCabAbajo posSt 15 1 47 1 7 )
+                                     0
+                                ;de lo contrario
+                                     ( if ( BuscarCabAbajo posSt 17 0 46 0 6 )
+                                          0
+                                     ;de lo contrario
+                                          ( if ( BuscarCabAbajo posSt 10 0 53 0 5 )
+                                               0
+                                          ;de lo contrario
+                                               1
+                                          );fin if
+                                     );fin if  
+                                );fin if
+                           );fin if
+                      );fin if
+                  );fin if
+              );fin if
+         );fin if
+      );fin definicion CaballoAliado
+
+      ( define ( AlfilAliado posSt )
+         ( define ( MoverIzqArriba apos pos )
+            ( if ( or ( <= pos 7 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) ( = pos 56 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                      0
+                 ;de lo contrario
+                      ( MoverDerArriba apos apos )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                           0
+                      ;de lo contrario
+                           ( MoverIzqArriba apos ( - pos 9 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerArriba apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerArriba apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverIzqArriba
+
+         ( define ( MoverDerArriba apos pos )
+            ( if ( or ( <= pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) ( = pos 63 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                      0
+                 ;de lo contrario
+                      ( MoverIzqAbajo apos apos )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                           0
+                      ;de lo contrario
+                           ( MoverDerArriba apos ( - pos 7 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzqAbajo apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzqAbajo apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverDerArriba
+
+         ( define ( MoverIzqAbajo apos pos )
+            ( if ( or ( >= pos 56 ) ( = pos 0 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                      0
+                 ;de lo contrario
+                      ( MoverDerAbajo apos apos )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                           0
+                      ;de lo contrario
+                           ( MoverIzqAbajo apos ( + pos 7 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerAbajo apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerAbajo apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverIzqAbajo
+
+         ( define ( MoverDerAbajo apos pos )
+            ( if ( or ( >= pos 56 ) ( = pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                      0
+                 ;de lo contrario
+                      ( BuscarFichas ( + posSt 1 ) )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                           0
+                      ;de lo contrario
+                           ( MoverDerAbajo apos ( + pos 9 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                               1
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE alfA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverIzqArriba         
+         ( MoverIzqArriba posSt posSt )
+      );fin definicion funcion AlfilAliado
+
+      ( define ( ReinaAliada posSt )
+         ( define ( MoverArriba apos pos )
+            ( if ( >= pos 8 )
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverArriba apos ( - pos 8 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzq apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzq apos apos )
+                           );fin if                      
+                      );fin if
+                 );fin if
+            ;de lo contrario
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      ( MoverIzq apos apos )
+                 );fin if 
+            );fin if
+         );fin definicion MoverArriba
+
+         ( define ( MoverIzq apos pos )
+            ( if ( or ( = pos 0 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) ( = pos 56 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE torrA )
+                      0
+                 ;de lo contrario
+                      ( MoverAbajo apos apos )
+                 );fin if
+             ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverIzq apos ( - pos 1 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                                ;de lo contrario
+                                ( MoverAbajo apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                                ;de lo contrario
+                                ( MoverAbajo apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if                 
+            );fin if
+         );fin definicion MoverIzq
+
+         ( define ( MoverAbajo apos pos )
+            ( if ( <= pos 55 )
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverAbajo apos ( + pos 8 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverDer apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverDer apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            ;de lo contrario
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      ( MoverDer apos apos )
+                 );fin if 
+            );fin if
+         );fin definicion MoverAbajo
+
+         ( define ( MoverDer apos pos )
+            ( if ( or ( = pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) ( = pos 63 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      ( MoverIzqArriba apos apos )
+                 );fin if
+             ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverDer apos ( + pos 1 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzqArriba apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                { begin
+                                   ( MoverIzqArriba apos apos )
+                                   ( printf " sigue buscando mate" )
+                                };fin begin
+                           );fin if
+                      );fin if                      
+                 );fin if                 
+            );fin if
+         );fin definicion MoverDer
+
+         ( define ( MoverIzqArriba apos pos )
+            ( if ( or ( <= pos 7 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) ( = pos 56 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      ( MoverDerArriba apos apos )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverIzqArriba apos ( - pos 9 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerArriba apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerArriba apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverIzqArriba
+
+         ( define ( MoverDerArriba apos pos )
+            ( if ( or ( <= pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) ( = pos 63 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      ( MoverIzqAbajo apos apos )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) #\. )
+                      ( if ( Jaque apos ( - pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverDerArriba apos ( - pos 7 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) pE ) )
+                           ( if ( Jaque apos ( - pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzqAbajo apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverIzqAbajo apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverDerArriba
+
+         ( define ( MoverIzqAbajo apos pos )
+            ( if ( or ( >= pos 56 ) ( = pos 0 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      ( MoverDerAbajo apos apos )
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverIzqAbajo apos ( + pos 7 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerAbajo apos apos )
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                ( MoverDerAbajo apos apos )
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverIzqAbajo
+
+         ( define ( MoverDerAbajo apos pos )
+            ( if ( or ( >= pos 56 ) ( = pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) )
+                 ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                      0
+                 ;de lo contrario
+                      1
+                 );fin if
+            ;de lo contrario
+                 ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) #\. )
+                      ( if ( Jaque apos ( + pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                           0
+                      ;de lo contrario
+                           ( MoverDerAbajo apos ( + pos 9 ) )
+                      );fin if
+                 ;de lo contrario
+                      ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) torrE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) cabE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) alfE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) reiE )
+                                ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) pE ) )
+                           ( if ( Jaque apos ( + pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      ;de lo contrario
+                           ( if ( Jaque apos pos rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE reiA )
+                                0
+                           ;de lo contrario
+                                1
+                           );fin if
+                      );fin if                      
+                 );fin if
+            );fin if
+         );fin definicion MoverIzqArriba         
+         ( MoverArriba posSt posSt )
+      );fin definicion funcion ReinaAliada
+
+      ( define ( ReyAliado posSt )
+         
+         ( define ( MoverDerArriba apos pos )
+            ( if ( or ( <= pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) ( = pos 63 ) )
+                 ( MoverArriba apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) #\. ) )
+                 ( if ( Jaque apos ( - pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverArriba apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverArriba apos apos )
+             );fin if
+             );fin if
+         );fin MoverDerArriba
+         
+         ( define ( MoverArriba apos pos )
+            ( if ( <= pos 7 )
+                 ( MoverIzqArriba apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) #\. ) )
+                 ( if ( Jaque apos ( - pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverIzqArriba apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverIzqArriba apos apos )
+             );fin if
+             );fin if
+         );fin MoverArriba
+         
+         ( define ( MoverIzqArriba apos pos )
+            ( if ( or ( <= pos 7 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) ( = pos 56 ) )
+                 ( MoverIzq apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) #\. ) )
+                 ( if ( Jaque apos ( - pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverIzq apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverIzq apos apos )
+             );fin if
+             );fin if
+         );fin MoverIzqArriba
+         
+         ( define ( MoverIzq apos pos )
+            ( if ( or ( = pos 0 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) ( = pos 56 ) )
+                 ( MoverIzqAbajo apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( - pos 1 ) ) #\. ) )
+                 ( if ( Jaque apos ( - pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverIzqAbajo apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverIzqAbajo apos apos )
+             );fin if
+             );fin if
+         );fin MoverIzq
+         ( define ( MoverIzqAbajo apos pos )
+            ( if ( or ( >= pos 56 )( = pos 0 ) ( = pos 8 ) ( = pos 16 ) ( = pos 24 ) ( = pos 32 ) ( = pos 40 ) ( = pos 48 ) )
+                 ( MoverAbajo apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) #\. ) )
+                 ( if ( Jaque apos ( + pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverAbajo apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverAbajo apos apos )
+             );fin if
+             );fin if
+         );fin MoverIzqAbajo
+         ( define ( MoverAbajo apos pos )
+            ( if ( >= pos 56 )
+                 ( MoverDerAbajo apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) #\. ) )
+                 ( if ( Jaque apos ( + pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverDerAbajo apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverDerAbajo apos apos )
+             );fin if
+             );fin if
+         );fin MoverAbajo
+         ( define ( MoverDerAbajo apos pos )
+            ( if ( or ( >= pos 55 ) ( = pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) )
+                 ( MoverDer apos apos )
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) #\. ) )
+                 ( if ( Jaque apos ( + pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      ( MoverDer apos apos )
+                  );fin if
+             ;de lo contrario
+                 ( MoverDer apos apos )
+             );fin if
+             );fin if
+         );fin MoverDerAbajo
+         ( define ( MoverDer apos pos )
+            ( if ( or ( = pos 7 ) ( = pos 15 ) ( = pos 23 ) ( = pos 31 ) ( = pos 39 ) ( = pos 47 ) ( = pos 55 ) ( = pos 63 ) )
+                 1
+            ;de lo contrario
+            ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) torrE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) cabE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) alfE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) reiE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) pE )
+                      ( equal? ( string-ref JaqMstAjedrez ( + pos 1 ) ) #\. ) )
+                 ( if ( Jaque apos ( + pos 1 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE rey )
+                      0
+                  ;de lo contrario
+                      1
+                  );fin if
+             ;de lo contrario
+                 1
+             );fin if
+             );fin if
+         );fin MoverDer         
+         ( MoverDerArriba posSt posSt )              
+      );fin definicion ReyAliado
+
+      ( define ( PeonAliado posSt )
+      ( define ( BuscarPeonDerN apos pos )
+         ( if ( and ( >= pos 0 ) ( <= pos 54 ) )
+              ( if ( = ( remainder pos 8 ) 7 )
+                   ( BuscarPeonIzqN apos apos )
+              ;de lo contrario
+              ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) torrE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) cabE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) alfE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) reiE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 9 ) ) pE ) )
+                   ( if ( Jaque apos ( + pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                        0
+                   ;de lo contrario
+                        ( BuscarPeonIzqN apos apos )
+                   );fin if
+              ;de lo contrario
+                   ( BuscarPeonIzqN apos apos )
+              );fin if
+              );fin if
+          ;de lo contrario
+              ( BuscarPeonIzqN apos apos )
+         );fin if
+     );fin definicion de la funcion BuscarPeonDerN      
+
+         ( define ( BuscarPeonIzqN apos pos )
+         ( if ( and ( >= pos 1 ) ( <= pos 55 ) )
+              ( if ( = ( remainder pos 8 ) 0 )
+                    ( BuscarPeonAbajo1N apos apos )
+              ; de lo contrario 
+              ( if ( or ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) torrE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) cabE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) alfE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) reiE )
+                        ( equal? ( string-ref JaqMstAjedrez ( + pos 7 ) ) pE ) )
+                   ( if ( Jaque apos ( + pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                        0
+                   ;de lo contrario
+                        ( BuscarPeonAbajo1N apos apos )
+                   );fin if
+              ;de lo contrario
+                   ( BuscarPeonAbajo1N apos apos )
+              );fin if
+              );fin if
+          ;de lo contrario
+              ( BuscarPeonAbajo1N apos apos )
+         );fin if
+      );fin definicion funcion BuscarPeonIzqN
+
+         ( define ( BuscarPeonAbajo1N apos pos )
+         ( if ( equal? ( string-ref JaqMstAjedrez ( + pos 8 ) ) #\. )
+              ( if ( Jaque apos ( + pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                   0
+              ;de lo contrario
+                   ( BuscarPeonAbajo2N apos apos )
+              );fin if
+          ;de lo contrario
+              ( BuscarPeonAbajo2N apos apos )
+         );fin if
+         );fin definicion funcion BuscarPeonAbajo1N
+
+         ( define ( BuscarPeonAbajo2N apos pos )
+         ( if ( or ( = pos 8 ) ( = pos 9 ) ( = pos 10 ) ( = pos 11 ) ( = pos 12 ) ( = pos 13 ) ( = pos 14 ) ( = pos 15 )
+                    ( equal? ( string-ref JaqMstAjedrez ( + pos 16 ) ) #\. ) )
+              ( if ( Jaque apos ( + pos 16 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                   0
+              ;de lo contrario
+                   1
+              );fin if
+          ;de lo contrario
+              1
+         );fin if
+         );fin definicion funcion BuscarPeonAbajo2N
+
+         ;Peones Blancos
+
+         ( define ( BuscarPeonDerB apos pos )
+         ( if ( and ( >= pos 8 ) ( <= pos 62 ) )
+              ( if ( = ( remainder pos 8 ) 7 )
+                   ( BuscarPeonIzqB apos apos )
+              ;de lo contrario
+              ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) torrE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) cabE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) alfE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) reiE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 7 ) ) pE ) )
+                   ( if ( Jaque apos ( - pos 7 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                        0
+                   ;de lo contrario
+                        ( BuscarPeonIzqB apos apos )
+                   );fin if
+              ;de lo contrario
+                   ( BuscarPeonIzqB apos apos )
+              );fin if
+              );fin if
+          ;de lo contrario
+              ( BuscarPeonIzqB apos apos )
+         );fin if
+         );fin definicion de la funcion BuscarPeonDerB
+
+      ( define ( BuscarPeonIzqB apos pos )
+         ( if ( and ( >= pos 9 ) ( <= pos 63 ) )
+              ( if ( = ( remainder pos 8 ) 7 )
+                   ( BuscarPeonArriba1B apos apos )
+              ;de lo contrario
+              ( if ( or ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) torrE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) cabE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) alfE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) reiE )
+                        ( equal? ( string-ref JaqMstAjedrez ( - pos 9 ) ) pE ) )
+                   ( if ( Jaque apos ( - pos 9 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                        0
+                   ;de lo contrario
+                        ( BuscarPeonArriba1B apos apos )
+                   );fin if
+              ;de lo contrario
+                   ( BuscarPeonArriba1B apos apos )
+              );fin if
+              );fin if
+          ;de lo contrario
+              ( BuscarPeonArriba1B apos apos )
+         );fin if
+         );fin definicion de la funcion BuscarPeonIzqB
+
+      ( define ( BuscarPeonArriba1B apos pos )
+         ( if ( equal? ( string-ref JaqMstAjedrez ( - pos 8 ) ) #\. )
+              ( if ( Jaque apos ( - pos 8 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                   0
+              ;de lo contrario
+                   ( BuscarPeonArriba2B apos apos )
+              );fin if
+          ;de lo contrario
+              ( BuscarPeonArriba2B apos apos )
+         );fin if
+         );fin definicion funcion BuscarPeonArriba1B
+
+         ( define ( BuscarPeonArriba2B apos pos )
+         ( if ( and ( = pos 48 ) ( = pos 49 ) ( = pos 50 ) ( = pos 51 ) ( = pos 52 ) ( = pos 53 ) ( = pos 54 ) ( = pos 55 )
+                    ( equal? ( string-ref JaqMstAjedrez ( - pos 16 ) ) #\. ) )
+              ( if ( Jaque apos ( - pos 16 ) rey torrA cabA alfA reiA pA reyE torrE cabE alfE reiE pE pA )
+                   0
+              ;de lo contrario
+                   1
+              );fin if
+          ;de lo contrario
+              1
+         );fin if
+         );fin definicion funcion BuscarPeonArriba2B
+      
+      ( if ( equal? rey #\K )
+           ( BuscarPeonDerN posSt posSt )
+           ( BuscarPeonDerB posSt posSt ) )
+     );fin definicion funcion PeonAliado
+
+
+
+
+      ( define ( EncontrarFichas posicion )
+         ( if ( <= posicion 64 )
+                     ;Torre
+              ( cond ( ( equal? ( string-ref JaqMstAjedrez posicion ) torrA )                       
+                       ( if ( = ( TorreAliada posicion ) 0 ) 0 ( EncontrarFichas ( + posicion 1 ) ) ) )
+                     ;Caballo
+                     ( ( equal? ( string-ref JaqMstAjedrez posicion ) cabA)                       
+                       ( if ( = ( CaballoAliado posicion ) 0 ) 0 ( EncontrarFichas ( + posicion 1 ) ) ) )
+                     ;Alfil
+                     ( ( equal? ( string-ref JaqMstAjedrez posicion ) alfA )                       
+                       ( if ( = ( AlfilAliado posicion ) 0 ) 0 ( EncontrarFichas ( + posicion 1 ) ) ) )
+                     ;Reina
+                     ( ( equal? ( string-ref JaqMstAjedrez posicion ) reiA )                       
+                       ( if ( = ( ReinaAliada posicion ) 0 ) 0 ( EncontrarFichas ( + posicion 1 ) ) ) )
+                     ;Rey
+                     ( ( equal? ( string-ref JaqMstAjedrez posicion ) rey )                       
+                       ( if ( = ( ReyAliado posicion ) 0 ) 0 ( EncontrarFichas ( + posicion 1 ) ) ) ) 
+                     ;Peon
+                     ( ( equal? ( string-ref JaqMstAjedrez posicion ) pA )                      
+                       ( if ( = ( PeonAliado posicion ) 0 ) 0 1 ) )
+                     ;de lo contrario
+                     ( else ( EncontrarFichas ( + posicion 1 ) ) )
+                     );fin cond
+              ;de lo contrario
+              ( void )
+              );fin if
+         );fin definicion funcion EncontrarFichas
+      
+      ( define ( BuscarFichas posicion )         
+         ( if ( = ( EncontrarFichas posicion ) 1 )
+              { begin
+                 ;se sgrega la imagen Movimiento Invalido
+                 ( ( ( draw-pixmap-posn "jaquemate.png" ) Chess ) ( make-posn 696 310 ) )
+                 ( sleep 1.5 )
+                 1
+              }
+         ;de lo contrario
+              0
+         );fin if
+      );fin definicion funcion BuscarFichas
+      ( BuscarFichas 0 )
+   );fin definicion JaqueMate      
+
+   
+;----------------------------------------------Botón de salida
+   ;definimos la funcion Salir para verificar si se ha hecho click en el botón de salida
+   ( define ( Salir posx posy )
+      ( if ( and ( >= posx 746 ) ( <= posx 854 ) ( >= posy 536 ) ( <= posy 584 ) )
+           ( begin
+           ( close-viewport Chess )
+           ( exit )
+           )
+      ;de lo contrario
+           ( void )
+      );fin if
+   );fin definicion funcion Salir
+   
+      
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Movimiento fichas  
+   ;definimos la MoverPeonN para evaluar y mover los peones 
+   ( define ( MoverPeonN aposx aposy )
+      ; se define la funcion CoronarN para la funcion de coronar con el peon negro. 
+      ( define ( CoronarN x y iposx iposy eposx eposy )
+         ;abrimos la ventana que contiene las fichas para coronar
+         ( define ventanaC ( open-viewport "Coronacion" 350 300 )  )
+         ;se agrega la imagen de fondo   
+         ( ( ( draw-pixmap-posn "Corona.png" ) ventanaC ) ( make-posn 0 0 ) )
+         ;se agrega la imagen que tiene el titulo y un marco para esta
+         ;( ( draw-solid-rectangle ventanaC ) ( make-posn 46 26 ) 258 48 "mistyrose" )
+  
+         ;se sgrega la imagen que tiene el botón reina y un marco para este
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 26 116 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "ReinaC.png" ) ventanaC ) ( make-posn 30 120 ) )
+         ;se sgrega la imagen que tiene el botón torre y un marco para esta
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 186 116 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "TorreC.png" ) ventanaC ) ( make-posn 190 120 ) )
+         ;se sgrega la imagen que tiene el botón alfil y un marco para este
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 26 196 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "AlfilC.png" ) ventanaC ) ( make-posn 30 200 ) )
+         ;se sgrega la imagen que tiene el botón caballo y un marco para esta
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 186 196 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "CaballoC.png" ) ventanaC ) ( make-posn 190 200 ) )
+         ;se obtienen las coordenadas del click dado por el usuario
+         ( define posicion ( get-mouse-click ventanaC ) )
+         ;se separan las coordenadas en el eje x y el eje y
+         ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+         ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+         ( if ( and ( >= posx 26 ) ( <= posx 164 )
+                    ( >= posy 116 ) ( <= posy 174 ) )
+              { begin
+                 ( string-set! orden ( posxy-String x y ) #\k )
+                 ( close-viewport ventanaC )
+                 ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\k )
+              };fin begin
+         ;de lo contrario
+              ( if ( and ( >= posx 186 ) ( <= posx 324 )
+                         ( >= posy 116 ) ( <= posy 174 ) )
+                   { begin
+                      ( string-set! orden ( posxy-String x y ) #\W )
+                      ( close-viewport ventanaC )
+                      ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\W )
+                   };fin begin
+              ;de lo contrario
+                   ( if ( and ( >= posx 26 ) ( <= posx 164 )
+                              ( >= posy 196 ) ( <= posy 254 ) )
+                        { begin
+                           ( string-set! orden ( posxy-String x y ) #\F )
+                           ( close-viewport ventanaC )
+                           ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\F )
+                        };fin begin
+                   ;de lo contrario
+                        ( if ( and ( >= posx 186 ) ( <= posx 324 )
+                                   ( >= posy 196 ) ( <= posy 254 ) )
+                             { begin
+                                ( string-set! orden ( posxy-String x y ) #\H )
+                                ( close-viewport ventanaC )
+                                ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\H )
+                             };fin begin
+                        ;de lo contrario
+                             ( CoronarN x y ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) )
+                        );fin if
+                   );fin if
+              );fin if
+         );fin if  
+      );fin definicion de la funcion CoronarN
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+      
+   ( define ( Mover aposx aposy posx posy )
+
+              ;movimiento inicial de dos casillas
+         ( if ( or ( equal? ( posxy-String aposx aposy ) 8 ) ( equal? ( posxy-String aposx aposy ) 9 )
+                   ( equal? ( posxy-String aposx aposy ) 10 ) ( equal? ( posxy-String aposx aposy ) 11 )
+                   ( equal? ( posxy-String aposx aposy ) 12 ) ( equal? ( posxy-String aposx aposy ) 13 )
+                   ( equal? ( posxy-String aposx aposy ) 14 ) ( equal? ( posxy-String aposx aposy ) 15 ) )
+              ( if ( and ( equal? ( + ( posxy-String aposx aposy ) 16 ) ( posxy-String posx posy ) )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          );fin if
+                   )
+                   ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) )( poststring-y ( posxy-String posx posy ) ) #\P )
+              ;de lo contrario
+                   ( if ( and ( equal? ( + ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          );fin if
+                              )
+                        ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\P )
+                   ;de lo contrario
+                        ( if ( and ( or ( equal? ( + ( posxy-String aposx aposy ) 7 ) ( posxy-String posx posy ) )
+                                        ( equal? ( + ( posxy-String aposx aposy ) 9 ) ( posxy-String posx posy ) ) )
+                                   ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\T )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\C )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\A )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\r )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\p ) )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          );fin if
+                                   )
+                             ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\P )                                       
+                        ;de lo contrario
+                             { begin
+                                ;se sgrega la imagen Movimiento Invalido
+                                ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                                ( sleep 1.5 )
+                             };fin begin
+                        );fin if
+                   );fin if
+              );fin if
+         ;de lo contrario
+                   ;movimineto normal
+              ( if ( >= ( posxy-String aposx aposy ) 16 )
+                   ( if ( and ( equal? ( + ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) )
+                              ( equal? ( string-ref orden( posxy-String posx posy ) ) #\. )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          );fin if
+                              )
+                        ( if ( >= ( posxy-String posx posy ) 56 )
+                             ( CoronarN posx posy ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                        ;de lo contrario
+                             ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\P )
+                        );fin if
+                   ;de lo contrario
+                             ;moviemnto diagonal para capturar fichas enemigas
+                        ( if ( and ( or ( equal? ( + ( posxy-String aposx aposy ) 7 ) ( posxy-String posx posy ) )
+                                        ( equal? ( + ( posxy-String aposx aposy ) 9 ) ( posxy-String posx posy ) ) )
+                                   ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\T )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\C )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\A )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\r )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\p ) )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          );fin if
+                                   )
+                             ( if ( >= ( posxy-String posx posy ) 56 )
+                                  ( CoronarN posx posy ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                             ;de lo contrario
+                                  ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\P )
+                             );fin if                                       
+                        ;de lo contrario
+                             { begin
+                                ;se sgrega la imagen Movimiento Invalido
+                                ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                                ( sleep 1.5 )
+                             };fin begin
+                        );fin if
+                   );fin if
+              ;de lo contrario
+                   ( void )
+              );fin if
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )
+   );fin definicion funcion MoverPeonN
+
+   ;definimos la MoverPeonB para evaluar y mover los peones rosas
+   ( define ( MoverPeonB aposx aposy )
+      
+      ( define ( CoronarB x y iposx iposy eposx eposy )
+         ;abrimos la ventana que contiene las fichas para coronar
+         ( define ventanaC ( open-viewport "Coronacion" 350 300 )  )
+         ;se agrega la imagen de fondo   
+         ( ( ( draw-pixmap-posn "Corona.png" ) ventanaC ) ( make-posn 0 0 ) )
+         ;se sgrega la imagen que tiene el botón reina y un marco para este
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 26 116 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "reinaC.png" ) ventanaC ) ( make-posn 30 120 ) )
+         ;se sgrega la imagen que tiene el botón torre y un marco para esta
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 186 116 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "torreC.png" ) ventanaC ) ( make-posn 190 120 ) )
+         ;se sgrega la imagen que tiene el botón alfil y un marco para este
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 26 196 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "alfilC.png" ) ventanaC ) ( make-posn 30 200 ) )
+         ;se sgrega la imagen que tiene el botón caballo y un marco para esta
+         ( ( draw-solid-rectangle ventanaC ) ( make-posn 186 196 ) 138 58 "black" )
+         ( ( ( draw-pixmap-posn "caballoC.png" ) ventanaC ) ( make-posn 190 200 ) )
+         ;se obtienen las coordenadas del click dado por el usuario
+         ( define posicion ( get-mouse-click ventanaC ) )
+         ;se separan las coordenadas en el eje x y el eje y
+         ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+         ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+         ( if ( and ( >= posx 26 ) ( <= posx 164 )
+                    ( >= posy 116 ) ( <= posy 174 ) )
+              { begin
+                 ( string-set! orden ( posxy-String x y ) #\r )
+                 ( close-viewport ventanaC )
+                 ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\r )
+              };fin begin
+         ;de lo contrario
+              ( if ( and ( >= posx 186 ) ( <= posx 324 )
+                         ( >= posy 116 ) ( <= posy 174 ) )
+                   { begin
+                      ( string-set! orden ( posxy-String x y ) #\T )
+                      ( close-viewport ventanaC )
+                      ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\T )
+                   };fin begin
+              ;de lo contrario
+                   ( if ( and ( >= posx 26 ) ( <= posx 164 )
+                              ( >= posy 196 ) ( <= posy 254 ) )
+                        { begin
+                           ( string-set! orden ( posxy-String x y ) #\A )
+                           ( close-viewport ventanaC )
+                           ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\A )
+                        };fin begin
+                   ;de lo contrario
+                        ( if ( and ( >= posx 186 ) ( <= posx 324 )
+                                   ( >= posy 196 ) ( <= posy 254 ) )
+                             { begin
+                                ( string-set! orden ( posxy-String x y ) #\C )
+                                ( close-viewport ventanaC )
+                                ( PonerCasTab ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) #\C )
+                             };fin begin
+                        ;de lo contrario
+                             ( CoronarB x y ( poststring-x ( posxy-String iposx iposy ) ) ( poststring-y ( posxy-String iposx iposy ) ) ( poststring-x ( posxy-String eposx eposy ) ) ( poststring-y ( posxy-String eposx eposy ) ) )
+                        );fin if
+                   );fin if
+              );fin if
+         );fin if  
+      );fin definicion de la funcion CoronarB
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+      
+      ( define ( Mover aposx aposy posx posy )
+              ;movimiento inicial de dos casillas
+         ( if ( or ( equal? ( posxy-String aposx aposy ) 48 ) ( equal? ( posxy-String aposx aposy ) 49 )
+                   ( equal? ( posxy-String aposx aposy ) 50 ) ( equal? ( posxy-String aposx aposy ) 51 )
+                   ( equal? ( posxy-String aposx aposy ) 52 ) ( equal? ( posxy-String aposx aposy ) 53 )
+                   ( equal? ( posxy-String aposx aposy ) 54 ) ( equal? ( posxy-String aposx aposy ) 55 ) )
+              ( if ( and ( equal? ( - ( posxy-String aposx aposy ) 16 ) ( posxy-String posx posy ) )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\P )
+                              #t
+                              ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                                   );fin if
+                              )
+                         )
+                   ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\p )
+              ;de lo contrario
+                   ( if ( and ( equal? ( - ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                              )
+                        ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\p )
+                   ;de lo contrario
+                        ( if ( and ( or ( equal? ( - ( posxy-String aposx aposy ) 7 ) ( posxy-String posx posy ) )
+                                        ( equal? ( - ( posxy-String aposx aposy ) 9 ) ( posxy-String posx posy ) ) )
+                                   ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\W )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\H )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\F )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\k )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\P ) )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                             ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\p )
+                        ;de lo contrario
+                             { begin
+                                ;se sgrega la imagen Movimiento Invalido
+                                ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                                ( sleep 1.5 )
+                             };fin begin
+                        );fin if
+                   );fin if
+              );fin if
+         ;de lo contrario
+                   ;movimiento normal
+              ( if ( <= ( posxy-String aposx aposy ) 47 )
+                   ( if ( and ( equal? ( - ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                              )
+                        ( if ( <= ( posxy-String posx posy ) 7 )
+                             ( CoronarB posx posy ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                        ;de lo contrario
+                             ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\p )
+                        );fin if
+                   ;de lo contrario
+                             ;moviemnto diagonal para capturar fichas enemigas
+                        ( if ( and ( or ( equal? ( - ( posxy-String aposx aposy ) 7 ) ( posxy-String posx posy ) )
+                                        ( equal? ( - ( posxy-String aposx aposy ) 9 ) ( posxy-String posx posy ) ) )
+                                   ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\W )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\H )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\F )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\k )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\P ) )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\P )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                             ( if ( <= ( posxy-String posx posy ) 7 )
+                                  ( CoronarB posx posy ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                             ;de lo contrario
+                                  ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) #\p )
+                             );fin if  
+                        ;de lo contrario
+                             { begin
+                                ;se sgrega la imagen Movimiento Invalido
+                                ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                                ( sleep 1.5 )
+                             };fin begin
+                        );fin if
+                   );fin if
+              ;de lo contrario
+                   ( void )
+              );fin if
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )      
+   );fin definicion funcion MoverPeonB
+
+   ;definimos la MoverTorres para evaluar y mover las torres
+   ( define ( MoverTorres aposx aposy char char1 char2 char3 char4 char5 )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+
+
+ ( define ( Mover aposx aposy posx posy )
+              ;movimiento hacia arriba o abajo
+         ( if ( and ( equal? ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                    ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                    ( if ( < ( posxy-String aposx aposy ) ( posxy-String posx posy ) )
+                             ( VerificarDer-Abajo ( + ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) 0 ( - ( / ( - ( posxy-String posx posy ) ( posxy-String aposx aposy ) ) 8 ) 1 ) 8 )
+                    ;de lo contrario
+                             ( VerificarIzq-Arriba ( - ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) 0 ( - ( / ( - ( posxy-String aposx aposy ) ( posxy-String posx posy ) ) 8 ) 1 ) 8 ) )
+                    ( if ( equal? char #\T )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\r )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\k )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                    )
+              ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+         ;de lo contrario
+                   ;movimiento hacia la derecha o izquierda
+              ( if ( and ( equal? ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                         ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                         ( if ( < ( posxy-String aposx aposy ) ( posxy-String posx posy ) )
+                             ( VerificarDer-Abajo ( + ( posxy-String aposx aposy ) 1 ) ( posxy-String posx posy ) 0 ( - ( - ( posxy-String posx posy ) ( posxy-String aposx aposy ) ) 1 ) 1 )
+                          ;de lo contrario
+                             ( VerificarIzq-Arriba ( - ( posxy-String aposx aposy ) 1 ) ( posxy-String posx posy ) 0 ( - ( - ( posxy-String aposx aposy ) ( posxy-String posx posy ) ) 1 ) 1 ) )
+                         ( if ( equal? char #\T )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\r )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\k )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ))
+                         )
+                   ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+              ;de lo contrario
+                     
+                   { begin
+                      ;se sgrega la imagen Movimiento Invalido
+                      ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                      ( sleep 1.5 )
+                   };fin begin
+              );fin if
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )      
+   );fin definicion funcion MoverTorres
+                       
+
+   ;definimos la MoverCaballos para mover los caballos
+   ( define ( MoverCaballos aposx aposy char char1 char2 char3 char4 char5 )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+      
+      ( define ( Mover aposx aposy posx posy )
+              ;movimiento dos arriba, una izquierda
+         ( if ( and ( and ( equal? ( poststring-x ( + ( posxy-String aposx aposy ) 1 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                          ( equal? ( poststring-y ( - ( posxy-String aposx aposy ) 16 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                    ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                    ( if ( equal? char #\C )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+              ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+         ;de lo contrario
+                   ;movimiento dos arriba, una izquierda
+              ( if ( and ( and ( equal? ( poststring-x ( - ( posxy-String aposx aposy ) 1 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                               ( equal? ( poststring-y ( - ( posxy-String aposx aposy ) 16 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                    ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                    ( if ( equal? char #\C )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                   ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+              ;de lo contrario
+                        ;movimiento dos abajo, una derecha
+                   ( if ( and ( and ( equal? ( poststring-x ( + ( posxy-String aposx aposy ) 1 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                                    ( equal? ( poststring-y ( + ( posxy-String aposx aposy ) 16 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                              ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                              ( if ( equal? char #\C )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                        ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+                   ;de lo contrario
+                             ;movimiento dos abajo, una izquierda
+                        ( if ( and ( and ( equal? ( poststring-x ( - ( posxy-String aposx aposy ) 1 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                                         ( equal? ( poststring-y ( + ( posxy-String aposx aposy ) 16 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                                   ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                        ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                                   ( if ( equal? char #\C )
+                                        ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                             ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+                        ;de lo contrario
+                                   ;movimiento dos derecha, una arriba
+                             ( if ( and ( and ( equal? ( poststring-x ( + ( posxy-String aposx aposy ) 2 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                                              ( equal? ( poststring-y ( - ( posxy-String aposx aposy ) 8 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                                        ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                             ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                             ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                             ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                             ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                             ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                                        ( if ( equal? char #\C )
+                                             ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                                  ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) (poststring-y  ( posxy-String posx posy ) ) char )                       
+                             ;de lo contrario
+                                       ;movimiento dos izquierda, una arriba
+                                  ( if ( and ( and ( equal? ( poststring-x ( - ( posxy-String aposx aposy ) 2 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                                                   ( equal? ( poststring-y ( - ( posxy-String aposx aposy ) 8 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                                             ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                                  ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                                  ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                                  ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                                  ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                                  ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                                             ( if ( equal? char #\C )
+                                                  ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                                       ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+                                  ;de lo contrario
+                                            ;movimiento dos izquierda, una abajo
+                                       ( if ( and ( and ( equal? ( poststring-x ( - ( posxy-String aposx aposy ) 2 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                                                        ( equal? ( poststring-y ( + ( posxy-String aposx aposy ) 8 ) ) ( poststring-y ( + ( posxy-String posx posy ) ) ) ) )
+                                                  ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                                       ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                                       ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                                       ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                                       ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                                       ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                                                  ( if ( equal? char #\C )
+                                                       ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                                            ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+                                       ;de lo contrario
+                                                 ;movimiento dos derecha, una abajo
+                                            ( if ( and ( and ( equal? ( poststring-x ( + ( posxy-String aposx aposy ) 2 ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                                                             ( equal? ( poststring-y ( + ( posxy-String aposx aposy ) 8 ) ) ( poststring-y( + ( posxy-String posx posy ) ) ) ) )
+                                                       ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                                            ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                                            ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                                            ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                                            ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                                            ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                                                       ( if ( equal? char #\C )
+                                                            ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\C )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\H )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+                                                 ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+                                            ;de lo contrario
+                                                 { begin
+                                                    ;se sgrega la imagen Movimiento Invalido
+                                                    ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                                                    ( sleep 1.5 )
+                                                 };fin begin
+                                            );fin if
+                                       );fin if
+                                  );fin if
+                             );fin if
+                        );fin if
+                   );fin if
+              );fin if
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )      
+   );fin definicion funcion MoverCaballos
+
+   ;definimos la MoverAlfiles para mover los alfiles
+   ( define ( MoverAlfiles aposx aposy char char1 char2 char3 char4 char5 )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+      
+      ( define ( Mover aposx aposy posx posy )
+         ( if ( and ( equal? ( abs ( - ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ) )
+                             ( abs ( - ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String posx posy ) ) ) ) )
+                    ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                    ( VerificarDiagonal ( posxy-String aposx aposy ) ( posxy-String posx posy ) )
+                    ( if ( equal? char #\A )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\A )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\F )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                    )
+                                  
+              ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+         ;de lo contrario
+              { begin
+                 ;se sgrega la imagen Movimiento Invalido
+                 ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                 ( sleep 1.5 )
+              };fin begin
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )
+   );fin definicion funcion MoverAlfiles
+
+   ;definimos la MoverReinas para evaluar y mover las reinas
+   ( define ( MoverReinas aposx aposy char char1 char2 char3 char4 char5 )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click  Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+      
+      ( define ( Mover aposx aposy posx posy )
+              ;movimiento hacia arriba o abajo
+         ( if ( and ( equal? ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                    ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                    ( if ( < ( posxy-String aposx aposy ) ( posxy-String posx posy ) )
+                             ( VerificarDer-Abajo ( + ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) 0 ( - ( / ( - ( posxy-String posx posy ) ( posxy-String aposx aposy ) ) 8 ) 1 ) 8 )
+                    ;de lo contrario
+                             ( VerificarIzq-Arriba ( - ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) 0 ( - ( / ( - ( posxy-String aposx aposy ) ( posxy-String posx posy ) ) 8 ) 1 ) 8 ) )
+                    ( if ( equal? char #\r )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\r )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\k )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                    )
+              ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+         ;de lo contrario
+                   ;movimiento hacia la derecha o izquierda
+              ( if ( and ( equal? ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                         ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                         ( if ( < ( posxy-String aposx aposy ) ( posxy-String posx posy ) )
+                             ( VerificarDer-Abajo ( + ( posxy-String aposx aposy ) 1 ) ( posxy-String posx posy ) 0 ( - ( - ( posxy-String posx posy ) ( posxy-String aposx aposy ) ) 1 ) 1 )
+                          ;de lo contrario
+                             ( VerificarIzq-Arriba ( - ( posxy-String aposx aposy ) 1 ) ( posxy-String posx posy ) 0 ( - ( - ( posxy-String aposx aposy ) ( posxy-String posx posy ) ) 1 ) 1 ) )
+                         ( if ( equal? char #\r )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\r )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\k )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ))
+                         )
+                   ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+              ;de lo contrario
+                        ;movimiento diagonal
+                   ( if ( and ( equal? ( abs ( - ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ) )
+                                       ( abs ( - ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String posx posy ) ) ) ) )
+                              ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                              ( VerificarDiagonal ( posxy-String aposx aposy ) ( posxy-String posx posy ) )
+                              ( if ( equal? char #\r )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\r )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\k )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                         )
+                        ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+                   ;de lo contrario
+                        { begin
+                           ;se sgrega la imagen Movimiento Invalido
+                           ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                           ( sleep 1.5 )
+                        };fin begin
+                   );fin if
+              );fin if
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )      
+   );fin definicion funcion MoverReinas
+
+   ;definimos la MoverReinas para evaluar y mover las reinas
+   ( define ( MoverRey aposx aposy char char1 char2 char3 char4 char5 )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+
+      ;botón salir
+      ( Salir posx posy )
+      
+      ( define ( Mover aposx aposy posx posy )
+              ;movimiento hacia arriba o abajo
+         ( if ( and ( equal? ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) )
+                    ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                         ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                    ( or ( equal? ( - ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) )
+                         ( equal? ( + ( posxy-String aposx aposy ) 8 ) ( posxy-String posx posy ) ) )
+                    ( if ( equal? char #\R )
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\R )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\K )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) ))
+              ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+         ;de lo contrario
+                   ;movimiento hacia la derecha o izquierda
+              ( if ( and ( equal? ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String posx posy ) ) )
+                         ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                              ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                         ( or ( equal? ( - ( posxy-String aposx aposy ) 1 ) ( posxy-String posx posy ) )
+                              ( equal? ( + ( posxy-String aposx aposy ) 1 ) ( posxy-String posx posy ) ) )
+                         ( if ( equal? char #\R )
+                              ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\R )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\K )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                         )
+                   ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )                       
+              ;de lo contrario
+                        ;movimiento diagonal
+                   ( if ( and ( equal? ( abs ( - ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ) )
+                                       ( abs ( - ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String posx posy ) ) ) ) )
+                              ( or ( equal? ( string-ref orden ( posxy-String posx posy ) ) char1 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char2 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char3 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char4 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) char5 )
+                                   ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\. ) )
+                              ( or ( equal? ( - ( posxy-String posx posy ) 7 ) ( posxy-String aposx aposy ) )
+                                   ( equal? ( - ( posxy-String posx posy ) 9 ) ( posxy-String aposx aposy ) )
+                                   ( equal? ( + ( posxy-String posx posy ) 7 ) ( posxy-String aposx aposy ) )
+                                   ( equal? ( + ( posxy-String posx posy ) 9 ) ( posxy-String aposx aposy ) ) )
+                              ( if ( equal? char #\R )
+                                   ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P #\R )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\R #\T #\C #\A #\r #\p #\K #\W #\H #\F #\k #\P ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          )
+                    ;de lo contrario
+                         ( if ( Jaque ( posxy-String aposx aposy ) ( posxy-String posx posy ) #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p #\K )
+                              #t
+                         ;de lo contrario
+                              ( if ( = ( JaqueMate #\K #\W #\H #\F #\k #\P #\R #\T #\C #\A #\r #\p ) 0 )
+                                   #false
+                                   #false
+                                                                 
+                              );fin if
+                          ) )
+                          )
+                        ( PonerCasTab ( poststring-x ( posxy-String aposx aposy ) ) ( poststring-y ( posxy-String aposx aposy ) ) ( poststring-x ( posxy-String posx posy ) ) ( poststring-y ( posxy-String posx posy ) ) char )
+                   ;de lo contrario
+                        { begin
+                           ;se sgrega la imagen Movimiento Invalido
+                           ( ( ( draw-pixmap-posn "Movimientoinvalido.png" ) Chess ) ( make-posn 696 310 ) )
+                           ( sleep 1.5 )
+                        };fin begin
+                   );fin if
+              );fin if
+         );fin if
+      );fin definicion funcion Mover
+      ( Mover aposx aposy posx posy )      
+   );fin definicion funcion MoverReinas
+
+
+  
+;----------------------------------------------Turno de juego----------------------------------------------
+   ;definimos Turno para verificar el turno de cada jugador
+   ( define ( Turno num )
+      ( define antStAjedrez ( string-copy orden ) )
+      ( cond ( ( = num 0 ) ( FichaAMoverB ) ( if ( equal? antStAjedrez orden ) ( Turno 0 ) ( Turno 1 ) ) )
+             ( ( = num 1 ) ( FichaAMoverN ) ( if ( equal? antStAjedrez orden ) ( Turno 1 ) ( Turno 0 ) ) )
+      );fin cond
+   );fin definicion de la funcion Turno
+
+;----------------------------------------------Elección de la ficha a mover 
+   ;definimos FichaAMover para saber que ficha desea mover el usuario 
+   ( define ( FichaAMoverN )
+      ;se sgrega la imagen que tiene el turno
+      ( ( ( draw-pixmap-posn "Turnonegra.png" ) Chess ) ( make-posn 696 310 ) )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+             ;Peones negros
+      ( cond ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\P )        ;por si me pide cambiar fichas
+               ( MoverPeonN posx posy ) )            
+             ;Torres negros
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\W )
+               ( MoverTorres posx posy #\W #\T #\C #\A #\r #\p ) )            
+             ;Caballos negros
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\H )
+               ( MoverCaballos posx posy #\H #\T #\C #\A #\r #\p ) )
+             ;Alfil negro
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\F )
+               ( MoverAlfiles posx posy #\F #\T #\C #\A #\r #\p ) )
+             ;Reina negra
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\k )
+               ( MoverReinas posx posy #\k #\T #\C #\A #\r #\p ) )
+             ;Rey negra
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\K )
+               ( MoverRey posx posy #\K #\T #\C #\A #\r #\p ) )
+             ;Boton salir
+             ( ( and ( >= posx 746 ) ( <= posx 854 )
+                     ( >= posy 536 ) ( <= posy 584 ) )
+               ( begin
+           ( close-viewport Chess )
+           ( exit )
+           ) )
+             ( else ;se sgrega la imagen Turno Incorrecto
+               ( ( ( draw-pixmap-posn "Turnoincorrecto.png" ) Chess ) ( make-posn 696 310 ) )
+               ( sleep 1.5 ) ( FichaAMoverN ) )
+      );fin cond
+   );fin definicion funcion FichaAMoverN
+
+   ;definimos FichaAMoverB para saber que ficha desea mover el usuario 
+   ( define ( FichaAMoverB )
+      ;se sgrega la imagen que tiene el turno
+      ( ( draw-solid-rectangle Chess ) ( make-posn 692 306 ) 188 78 "rosybrown" )
+      ( ( ( draw-pixmap-posn "Turnorosadas.png" ) Chess ) ( make-posn 696 310 ) )
+      
+      ;se obtienen las coordenadas del click dado por el usuario
+      ( define posicion ( get-mouse-click Chess ) )
+      ;se separan las coordenadas en el eje x y el eje y
+      ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+      ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+             ;Peones rosa
+      ( cond ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\p )
+               ( MoverPeonB posx posy ) )
+             ;Torres rosa
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\T )
+               ( MoverTorres posx posy #\T #\W #\H #\F #\k #\P ) )
+             ;Caballos rosa
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\C )
+               ( MoverCaballos posx posy #\C #\W #\H #\F #\k #\P ) )
+             ;Alfil rosa
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\A )
+               ( MoverAlfiles posx posy #\A #\W #\H #\F #\k #\P ) )
+             ;Reina rosa
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\r )
+               ( MoverReinas posx posy #\r #\W #\H #\F #\k #\P ) )
+             ;Rey rosa
+             ( ( equal? ( string-ref orden ( posxy-String posx posy ) ) #\R )
+               ( MoverRey posx posy #\R #\W #\H #\F #\k #\P ) )
+             ;Boton salir
+             ( ( and ( >= posx 746 ) ( <= posx 854 )
+                     ( >= posy 536 ) ( <= posy 584 ) )
+               ( begin
+           ( close-viewport Chess )
+           ( exit )
+           ) )
+             ( else ;se sgrega la imagen Turno Incorrecto
+               ( ( ( draw-pixmap-posn "Turnoincorrecto.png" ) Chess ) ( make-posn 696 310 ) )
+               ( sleep 1.5 ) ( FichaAMoverB ) )
+      );fin cond
+   );fin definicion funcion FichaAMoverB
+   ( Turno 0 )
+);fin definicion funcion Partida
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Pantalla Inicio
+
+; se define la funcion Inicio que realizará la primer ventana. ( Inicio )
+( define ( Inicio )
+   ( define ventanaB ( open-viewport "Ajedrez de Valeria Muñoz Ramirez" 950 650 )  )  
+   ( ( ( draw-pixmap-posn "Flor.png" ) ventanaB ) ( make-posn 0 0 ) )
+   ;Titulo y nombre Ajedrez 
+   ( ( draw-solid-rectangle ventanaB ) ( make-posn 246 146 ) 508 108 "black" )
+   ( ( ( draw-pixmap-posn "Val.png" ) ventanaB ) ( make-posn 250 150 ) )
+   ;iniciar partida
+   ( ( draw-solid-rectangle ventanaB ) ( make-posn 396 346 ) 208 88 "black" )
+   ( ( ( draw-pixmap-posn "Hola.png" ) ventanaB ) ( make-posn 400 350 ) )
+   ;Finalizar partida
+   ( ( draw-solid-rectangle ventanaB ) ( make-posn 406 466 ) 188 78 "black" )
+   ( ( ( draw-pixmap-posn "end.png" ) ventanaB ) ( make-posn 410 470 ) )
+; se define la funcion INfinpartida para el funcionamiento de estos botones. 
+( define ( InfinPartida )
+  ; se definen las coordenadas en las que el usuario da click
+  ( define posicion ( get-mouse-click ventanaB ) )
+  ;coordenadas en el eje x 
+  ( define posx ( posn-x ( mouse-click-posn posicion ) ) )
+  ; coordenada eje y
+  ( define posy ( posn-y ( mouse-click-posn posicion ) ) )
+      ; inicio condicional if
+      ( if ( and ( >= posx 396 ) ( <= posx 604 )
+                 ( >= posy 346 ) ( <= posy 434 ) )
+           ; inicio begin
+           { begin
+              ( close-viewport ventanaB )
+              ( Partida )
+           };finaliza begin
+      ;de lo contrario
+          ( if ( and ( >= posx 406 ) ( <= posx 594 )
+                     ( >= posy 466 ) ( <= posy 554 ) )
+               
+               ( close-viewport ventanaB )
+           ;de lo contrario
+               ( InfinPartida )
+           );finaliza condicional if
+      );finaliza condicional if
+);finaliza definicion funcion InfinPartida
+( InfinPartida )
+);finaliza definicion funcion Inicio
+( Inicio )
